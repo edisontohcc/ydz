@@ -8,7 +8,7 @@
 </head>
 <body class="bg-light p-4">
   <div class="container">
-    <h1 class="mb-4">YinDuZhang</h1>
+    <h1 class="mb-4">Meal Cost Splitter</h1>
 
     <div class="card mb-4">
       <div class="card-body">
@@ -20,13 +20,14 @@
 
     <div class="card mb-4">
       <div class="card-body">
-        <h2 class="card-title">Event</h2>
+        <h2 class="card-title">Meals</h2>
         <div id="events"></div>
-        <button class="btn btn-primary mt-3" onclick="addMeal()">Add Event</button>
+        <button class="btn btn-primary mt-3" onclick="addMeal()">Add Meal</button>
       </div>
     </div>
 
-    <button class="btn btn-success mb-4" onclick="calculate()">Calculate Balances</button>
+    <button class="btn btn-success mb-2" onclick="calculate()">Calculate Balances</button>
+    <button class="btn btn-outline-secondary mb-4" onclick="downloadPDF()">Download PDF</button>
 
     <div class="card">
       <div class="card-body">
@@ -66,8 +67,8 @@
     }
 
     function addMeal() {
-      const mealName = prompt("Enter event's name (e.g., Dinner):");
-      const payer = prompt("Who paid for this event?");
+      const mealName = prompt("Enter meal name (e.g., Breakfast):");
+      const payer = prompt("Who paid for this meal?");
       if (!mealName || !payer || !people.includes(payer)) return;
 
       const container = document.createElement('div');
@@ -143,24 +144,43 @@
         for (const creditor in owes[debtor]) {
           const amount = owes[debtor][creditor];
           if (amount > 0) {
-            output += `<li class="list-group-item">${debtor} need to pay to ${creditor}: \$${amount.toFixed(2)}</li>`;
+            output += `<li class="list-group-item">${debtor} owes ${creditor}: \$${amount.toFixed(2)}</li>`;
           }
         }
       }
       output += '</ul>';
 
-      //output += '<h4>Final Balances</h4><ul class="list-group">';
-      //for (const p of people) {
-      //  output += `<li class="list-group-item">${p}: \$${balances[p].toFixed(2)}</li>`;
-      //}
-      //output += '</ul>';
+      output += '<h4>Final Balances</h4><ul class="list-group">';
+      for (const p of people) {
+        output += `<li class="list-group-item">${p}: \$${balances[p].toFixed(2)}</li>`;
+      }
+      output += '</ul>';
 
       document.getElementById('results').innerHTML = output;
+    }
+
+    function downloadPDF() {
+      const element = document.getElementById('results');
+      if (!element.innerHTML.trim()) {
+        alert("Please calculate the results first.");
+        return;
+      }
+
+      const opt = {
+        margin: 0.5,
+        filename: 'meal-split-results.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      html2pdf().from(element).set(opt).save();
     }
 
     renderPeople();
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </body>
 </html>
